@@ -1,5 +1,6 @@
 defmodule CSVDedupe.Deduper.EmailDeduper do
-  alias CSVDedupe.Utils.MergeData
+  alias CSVDedupe.Utils.{AddRowToList, HandleDuplicateRow}
+  alias CSVDedupe.Deduper.ParsedData
 
   # if there's no email, we add it to the :noemail list
   def dedupe(
@@ -8,7 +9,7 @@ defmodule CSVDedupe.Deduper.EmailDeduper do
         _columns
       )
       when email == "" do
-    add_email_to_list(parsed_data, row)
+    AddRowToList.run(parsed_data, row)
   end
 
   def dedupe(
@@ -22,32 +23,25 @@ defmodule CSVDedupe.Deduper.EmailDeduper do
 
         parsed_data
         |> Map.put(:unique_emails, unique_emails)
-        |> add_email_to_list(row)
+        |> AddRowToList.run(row)
 
       match ->
-        handle_duplicate_email(parsed_data, row, match, columns)
+        HandleDuplicateRow.run(parsed_data, row, match, columns)
     end
   end
 
-  defp handle_duplicate_email(%{parsed_rows: parsed_rows} = parsed_data, row, match, columns) do
-    merged_record =
-      parsed_rows
-      |> Map.get(match)
-      |> MergeData.run(row, columns)
-
-    parsed_rows = Map.put(parsed_rows, match, merged_record)
-    Map.put(parsed_data, :parsed_rows, parsed_rows)
+  def get_matching_email(%ParsedData{unique_emails: unique_emails}, email) do
+    Map.get(unique_emails, email)
   end
 
-  defp add_email_to_list(
-         %{cur_id: cur_id, parsed_rows: parsed_rows} = parsed_data,
-         row
-       ) do
-    parsed_rows = Map.put(parsed_rows, cur_id, row)
+  def add_unique_email(%ParsedData{unique_emails: unique_emails} = parsed_data, email, id) do
+    case email do
+      "" ->
+        parsed_data
 
-    Map.merge(parsed_data, %{
-      parsed_rows: parsed_rows,
-      cur_id: cur_id + 1
-    })
+      email ->
+        unique_emails = Map.put(unique_emails, email, id)
+        Map.put(parsed_data, :unique_emails, unique_emails)
+    end
   end
 end

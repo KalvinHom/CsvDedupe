@@ -1,57 +1,49 @@
 defmodule CSVDedupe.Deduper.PhoneDeduper do
-  alias CSVDedupe.Utils.MergeData
+  alias CSVDedupe.Utils.{AddRowToList, HandleDuplicateRow}
   alias CSVDedupe.Deduper.ParsedData
 
   # if there's no phone, we add it to the :nophone list
   def dedupe(%ParsedData{} = parsed_data, %{phone: phone} = row, _columns)
       when phone == "" do
-    add_phone_to_list(parsed_data, row)
+    AddRowToList.run(parsed_data, row)
   end
 
   def dedupe(
-        %ParsedData{unique_phones: unique_phones, cur_id: cur_id} = parsed_data,
+        %ParsedData{cur_id: cur_id} = parsed_data,
         %{phone: phone} = row,
         columns
       ) do
-    cleaned_phone = clean_number(phone)
-
-    case Map.get(unique_phones, cleaned_phone) do
+    case get_matching_phone(parsed_data, phone) do
       nil ->
-        unique_phones = Map.put(unique_phones, cleaned_phone, cur_id)
-
         parsed_data
-        |> Map.put(:unique_phones, unique_phones)
-        |> add_phone_to_list(row)
+        |> add_unique_phone(phone, cur_id)
+        |> AddRowToList.run(row)
 
       match ->
-        handle_duplicate_phone(parsed_data, row, match, columns)
+        HandleDuplicateRow.run(parsed_data, row, match, columns)
     end
   end
 
-  defp handle_duplicate_phone(%{parsed_rows: parsed_rows} = parsed_data, row, match, columns) do
-    merged_record =
-      parsed_rows
-      |> Map.get(match)
-      |> MergeData.run(row, columns)
+  def get_matching_phone(%ParsedData{unique_phones: unique_phones}, phone) do
+    cleaned_phone = clean_number(phone)
+    Map.get(unique_phones, cleaned_phone)
+  end
 
-    parsed_rows = Map.put(parsed_rows, match, merged_record)
-    Map.put(parsed_data, :parsed_rows, parsed_rows)
+  def add_unique_phone(%ParsedData{unique_phones: unique_phones} = parsed_data, phone, id) do
+    cleaned_phone = clean_number(phone)
+
+    case cleaned_phone do
+      "" ->
+        parsed_data
+
+      clean ->
+        unique_phones = Map.put(unique_phones, clean, id)
+        Map.put(parsed_data, :unique_phones, unique_phones)
+    end
   end
 
   def clean_number(phone) do
     regex = ~r/\s|\(|\)|\-\+/
     Regex.replace(regex, phone, "")
-  end
-
-  def add_phone_to_list(
-        %{cur_id: cur_id, parsed_rows: parsed_rows} = parsed_data,
-        row
-      ) do
-    parsed_rows = Map.put(parsed_rows, cur_id, row)
-
-    Map.merge(parsed_data, %{
-      parsed_rows: parsed_rows,
-      cur_id: cur_id + 1
-    })
   end
 end
