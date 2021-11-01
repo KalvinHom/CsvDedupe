@@ -43,7 +43,7 @@ defmodule CSVDedupe.Deduper.PhoneDeduper do
   end
 
   def clean_number(phone) do
-    regex = ~r/\s|\(|\)|\-\+/
+    regex = ~r/\s|\(|\)|\-|\+/
     Regex.replace(regex, phone, "")
   end
 end

@@ -1,5 +1,5 @@
 defmodule CSVDedupe.Deduper do
-  alias CSVDedupe.Deduper.{EmailDeduper, PhoneDeduper}
+  alias CSVDedupe.Deduper.{EmailDeduper, PhoneDeduper, EmailOrPhoneDeduper, ParsedData}
 
   @moduledoc """
   Takes in a CSV file and dedupe type, returns a CSV without duplicates
@@ -27,10 +27,11 @@ defmodule CSVDedupe.Deduper do
     file
     |> File.stream!()
     |> remove_header_row()
-    |> Enum.reduce(%{}, fn row, acc ->
+    |> Enum.reduce(%ParsedData{}, fn row, acc ->
       row
       |> String.trim()
       |> dedupe_row(acc, strategy)
+      |> IO.inspect()
     end)
   end
 
@@ -49,6 +50,9 @@ defmodule CSVDedupe.Deduper do
 
   defp process_row(row, kept_rows, "phone"),
     do: PhoneDeduper.dedupe(kept_rows, row, @columns)
+
+  defp process_row(row, kept_rows, "email_or_phone"),
+    do: EmailOrPhoneDeduper.dedupe(kept_rows, row, @columns)
 
   defp build_row(row) do
     row
