@@ -21,7 +21,7 @@ If the first row has blank data that the later row has, the later row's data wil
 
 `mix escript.build`
 
-`/csv_dedupe --file ".test.csv" -s "email"`
+`./csv_dedupe -f ".test.csv" -s "email"`
 
 ## Performance Assumption
 
