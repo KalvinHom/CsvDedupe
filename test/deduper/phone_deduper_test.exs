@@ -1,4 +1,4 @@
-defmodule CSVDedupe.PhoneDeduperTest do
+defmodule CSVDedupe.Deduper.PhoneDeduperTest do
   use ExUnit.Case
   alias CSVDedupe.Deduper.{PhoneDeduper, ParsedData}
   import CSVDedupeTest.Fixtures
@@ -66,9 +66,8 @@ defmodule CSVDedupe.PhoneDeduperTest do
     test "blank data from first record gets filled in with the duplicate's" do
       with_phone = fixture(%{phone: "123 456 7890", first_name: ""})
       with_phone2 = fixture(%{phone: "123 456 7890"})
-      key = PhoneDeduper.clean_number(with_phone.phone)
 
-      %ParsedData{unique_phones: unique_phones, parsed_rows: parsed_rows} =
+      %ParsedData{parsed_rows: parsed_rows} =
         %ParsedData{}
         |> PhoneDeduper.dedupe(with_phone, @columns)
         |> PhoneDeduper.dedupe(with_phone2, @columns)

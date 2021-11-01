@@ -22,5 +22,8 @@ erl_crash.dump
 # Ignore package tarball (built via "mix hex.build").
 csv_dedupe-*.tar
 
+csv_dedupe
 # Temporary files, for example, from tests.
 /tmp/
+
+/test/.DS_Store

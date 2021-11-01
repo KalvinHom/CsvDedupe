@@ -1,4 +1,4 @@
-defmodule CSVDedupe.EmailDeduperTest do
+defmodule CSVDedupe.Deduper.EmailDeduperTest do
   use ExUnit.Case
   alias CSVDedupe.Deduper.EmailDeduper
   alias CSVDedupe.Deduper.ParsedData
@@ -50,6 +50,13 @@ defmodule CSVDedupe.EmailDeduperTest do
     test "blank data from first record gets filled in with the duplicate's" do
       with_email = fixture(%{email: "kalvin.hom@gmail.com", first_name: ""})
       with_email2 = fixture(%{email: "kalvin.hom@gmail.com"})
+
+      %ParsedData{parsed_rows: parsed_rows} =
+        %ParsedData{}
+        |> EmailDeduper.dedupe(with_email, @columns)
+        |> EmailDeduper.dedupe(with_email2, @columns)
+
+      assert(Map.get(parsed_rows, 0).first_name == with_email2.first_name)
     end
   end
 end

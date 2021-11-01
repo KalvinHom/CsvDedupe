@@ -1,4 +1,4 @@
-defmodule CSVDedupe.EmailOrPhoneDeduperTest do
+defmodule CSVDedupe.Deduper.EmailOrPhoneDeduperTest do
   use ExUnit.Case
   alias CSVDedupe.Deduper.{EmailOrPhoneDeduper, PhoneDeduper}
   alias CSVDedupe.Deduper.ParsedData

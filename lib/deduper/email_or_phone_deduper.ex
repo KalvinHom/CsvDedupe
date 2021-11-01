@@ -21,7 +21,6 @@ defmodule CSVDedupe.Deduper.EmailOrPhoneDeduper do
       when is_nil(phone) do
     parsed_data = EmailDeduper.dedupe(parsed_data, row, columns)
     %ParsedData{unique_emails: unique_emails, parsed_rows: parsed_rows} = parsed_data
-    # if data has phone number, update that map as well.
     key = Map.get(unique_emails, email)
     record = Map.get(parsed_rows, key)
 
@@ -42,7 +41,6 @@ defmodule CSVDedupe.Deduper.EmailOrPhoneDeduper do
       when is_nil(email) do
     parsed_data = PhoneDeduper.dedupe(parsed_data, row, columns)
     %ParsedData{unique_emails: unique_emails, parsed_rows: parsed_rows} = parsed_data
-    # if data has email, update that map as well.
     key = PhoneDeduper.get_matching_phone(parsed_data, phone)
     record = Map.get(parsed_rows, key)
 

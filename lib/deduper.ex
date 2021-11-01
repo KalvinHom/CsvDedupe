@@ -1,5 +1,6 @@
 defmodule CSVDedupe.Deduper do
   alias CSVDedupe.Deduper.{EmailDeduper, PhoneDeduper, EmailOrPhoneDeduper, ParsedData}
+  alias NimbleCSV.RFC4180, as: CSV
 
   @moduledoc """
   Takes in a CSV file and dedupe type, returns a CSV without duplicates
@@ -13,17 +14,24 @@ defmodule CSVDedupe.Deduper do
         aliases: [f: :file, s: :strategy]
       )
 
+    filepath = "./dedupe_#{:os.system_time(:millisecond)}.csv"
+
     dedupe(Keyword.get(opts, :file), Keyword.get(opts, :strategy))
+    |> write_to_file(filepath)
   end
 
-  defp dedupe(file, strategy) when is_nil(file) or is_nil(strategy),
-    do: IO.puts("Please include --file and --strategy arguments")
+  def dedupe(file, strategy) when is_nil(file) or is_nil(strategy) do
+    IO.puts("Please include --file and --strategy arguments")
+    nil
+  end
 
-  defp dedupe(_file, strategy)
-       when strategy != "email" and strategy != "phone" and strategy != "email_or_phone",
-       do: IO.puts("Pleae input a valid strategy: email, phone, email_or_phone")
+  def dedupe(_file, strategy)
+      when strategy != "email" and strategy != "phone" and strategy != "email_or_phone" do
+    IO.puts("Pleae input a valid strategy: email, phone, email_or_phone")
+    nil
+  end
 
-  defp dedupe(file, strategy) do
+  def dedupe(file, strategy) do
     file
     |> File.stream!()
     |> remove_header_row()
@@ -31,8 +39,26 @@ defmodule CSVDedupe.Deduper do
       row
       |> String.trim()
       |> dedupe_row(acc, strategy)
-      |> IO.inspect()
     end)
+  end
+
+  def write_to_file(nil, _filepath), do: nil
+
+  def write_to_file(data, filepath) do
+    File.touch!(filepath)
+    file = File.open!(filepath, [:write])
+
+    max_row_idx = data.cur_id - 1
+
+    Enum.map(0..max_row_idx, fn idx ->
+      data = Map.get(data.parsed_rows, idx)
+      [data.first_name, data.last_name, data.email, data.phone]
+    end)
+    |> List.insert_at(0, ["FirstName", "LastName", "Email", "Phone"])
+    |> CSV.dump_to_stream()
+    |> Enum.each(&IO.binwrite(file, &1))
+
+    File.close(file)
   end
 
   # skip blank lines

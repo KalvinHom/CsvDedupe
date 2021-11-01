@@ -2,7 +2,6 @@ defmodule CSVDedupe.Deduper.PhoneDeduper do
   alias CSVDedupe.Utils.{AddRowToList, HandleDuplicateRow}
   alias CSVDedupe.Deduper.ParsedData
 
-  # if there's no phone, we add it to the :nophone list
   def dedupe(%ParsedData{} = parsed_data, %{phone: phone} = row, _columns)
       when phone == "" do
     AddRowToList.run(parsed_data, row)

@@ -2,7 +2,6 @@ defmodule CSVDedupe.Deduper.EmailDeduper do
   alias CSVDedupe.Utils.{AddRowToList, HandleDuplicateRow}
   alias CSVDedupe.Deduper.ParsedData
 
-  # if there's no email, we add it to the :noemail list
   def dedupe(
         parsed_data,
         %{email: email} = row,
