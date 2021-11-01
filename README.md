@@ -25,6 +25,7 @@ The final phone numbers will look as the original CSV without any characters str
 ## How to Run
 
 `mix escript.build`
+
 `/csv_dedupe --file ".test.csv" -s "email"`
 
 ## Performance Assumption
@@ -33,7 +34,7 @@ I am assuming that a company's employee system does not have so many records tha
 records in a hash will have memory and performance implications. If this becomes the case,
 the data should be stored differently.
 
-## Feature Improvements
+## Future Feature Improvements
 
 A nice-to-have would be to return a second spreadsheet showing all merge conflicts, so
 that it can be reviewed manually for mistakes.
