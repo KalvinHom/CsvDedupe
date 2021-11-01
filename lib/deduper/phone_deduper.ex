@@ -2,9 +2,14 @@ defmodule CSVDedupe.Deduper.PhoneDeduper do
   alias CSVDedupe.Utils.{AddRowToList, HandleDuplicateRow}
   alias CSVDedupe.Deduper.ParsedData
 
-  def dedupe(%ParsedData{} = parsed_data, %{phone: phone} = row, _columns)
+  def dedupe(%ParsedData{} = parsed_data, %{phone: phone} = row, columns)
       when phone == "" do
-    AddRowToList.run(parsed_data, row)
+    empty_row? = Enum.all?(columns, fn column -> Map.get(row, column) == "" end)
+
+    case empty_row? do
+      true -> parsed_data
+      false -> AddRowToList.run(parsed_data, row)
+    end
   end
 
   def dedupe(

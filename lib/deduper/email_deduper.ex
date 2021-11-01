@@ -5,10 +5,15 @@ defmodule CSVDedupe.Deduper.EmailDeduper do
   def dedupe(
         parsed_data,
         %{email: email} = row,
-        _columns
+        columns
       )
       when email == "" do
-    AddRowToList.run(parsed_data, row)
+    empty_row? = Enum.all?(columns, fn column -> Map.get(row, column) == "" end)
+
+    case empty_row? do
+      true -> parsed_data
+      false -> AddRowToList.run(parsed_data, row)
+    end
   end
 
   def dedupe(
