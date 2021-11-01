@@ -17,11 +17,6 @@ Duplicate rows will attempt to be merged by filling in blank existing data.
 Where there is a conflict in data, the earlier row's data takes precedence.
 If the first row has blank data that the later row has, the later row's data will fill in the blanks.
 
-## Resulting CSV
-
-The final ordering of the CSV will not match the original.
-The final phone numbers will look as the original CSV without any characters stripped.
-
 ## How to Run
 
 `mix escript.build`
